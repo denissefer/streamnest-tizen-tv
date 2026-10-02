@@ -442,3 +442,63 @@ footer {
 
     font-size: 16px;
 }
+/* =========================
+   AV PLAYER
+========================= */
+
+.player-area {
+    position: relative;
+    overflow: hidden;
+}
+
+#av-player {
+    position: absolute;
+
+    width: 100%;
+    height: 100%;
+
+    top: 0;
+    left: 0;
+
+    z-index: 1;
+}
+
+#player-placeholder {
+    position: relative;
+    z-index: 2;
+}
+
+#player-loading {
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+
+    z-index: 3;
+
+    transform: translate(-50%, -50%);
+
+    font-size: 28px;
+}
+
+#player-error {
+    position: absolute;
+
+    left: 40px;
+    right: 40px;
+    bottom: 40px;
+
+    z-index: 4;
+
+    padding: 20px;
+
+    background: rgba(0, 0, 0, 0.85);
+
+    border-radius: 10px;
+
+    color: #ff7474;
+
+    text-align: center;
+
+    font-size: 18px;
+}

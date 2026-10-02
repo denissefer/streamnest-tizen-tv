@@ -1,15 +1,19 @@
 var channels = [];
 var currentChannels = [];
 var currentCategory = "All Channels";
+var isChannelPlaying = false;
+var isChannelPaused = false;
 
 
 document.addEventListener("DOMContentLoaded", function () {
 
     console.log("StreamNest started");
 
-    startClock();
+   startClock();
 
-    setupWelcomeScreen();
+setupWelcomeScreen();
+
+setupTVRemote();
 
     var savedPlaylist =
         localStorage.getItem("streamnest_playlist");
@@ -592,24 +596,466 @@ function renderChannels() {
     );
 
 
+    function setupTVRemote() {
+
+    /*
+     * Register Samsung media keys.
+     * Arrow keys, Enter and Back do not
+     * need to be registered.
+     */
+
+    if (
+        typeof tizen !== "undefined" &&
+        tizen.tvinputdevice
+    ) {
+
+        try {
+
+            tizen.tvinputdevice.registerKey(
+                "MediaPlayPause"
+            );
+
+            console.log(
+                "Samsung media keys registered"
+            );
+
+        } catch (error) {
+
+            console.log(
+                "Could not register media keys:",
+                error
+            );
+        }
+    }
+
+
+    document.addEventListener(
+        "keydown",
+        function (event) {
+
+            /*
+             * BACK
+             * Samsung TV keyCode = 10009
+             */
+
+            if (event.keyCode === 10009) {
+
+                event.preventDefault();
+
+                handleBackButton();
+
+                return;
+            }
+
+
+            /*
+             * PLAY / PAUSE
+             */
+
+            if (
+                event.key === "MediaPlayPause" ||
+                event.keyCode === 10252
+            ) {
+
+                event.preventDefault();
+
+                togglePlayPause();
+
+                return;
+            }
+
+        }
+    );
+}
+
+
+function togglePlayPause() {
+
+    if (
+        typeof webapis === "undefined" ||
+        !webapis.avplay ||
+        !isChannelPlaying
+    ) {
+
+        return;
+    }
+
+
+    try {
+
+        var state =
+            webapis.avplay.getState();
+
+
+        if (state === "PLAYING") {
+
+            webapis.avplay.pause();
+
+            isChannelPaused = true;
+
+            console.log(
+                "Playback paused"
+            );
+
+        } else if (state === "PAUSED") {
+
+            webapis.avplay.play();
+
+            isChannelPaused = false;
+
+            console.log(
+                "Playback resumed"
+            );
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Play/Pause error:",
+            error
+        );
+    }
+}
+
+
+function handleBackButton() {
+
+    /*
+     * If a channel is playing,
+     * stop it and return to channel list.
+     */
+
+    if (isChannelPlaying) {
+
+        stopCurrentChannel();
+
+        return;
+    }
+
+
+    /*
+     * If no channel is playing,
+     * exit the application.
+     */
+
+    if (
+        typeof tizen !== "undefined" &&
+        tizen.application
+    ) {
+
+        try {
+
+            tizen.application
+                .getCurrentApplication()
+                .exit();
+
+        } catch (error) {
+
+            console.error(
+                "Could not exit application:",
+                error
+            );
+        }
+    }
+}
+
+
+function stopCurrentChannel() {
+
+    if (
+        typeof webapis !== "undefined" &&
+        webapis.avplay
+    ) {
+
+        try {
+
+            var state =
+                webapis.avplay.getState();
+
+
+            if (
+                state === "PLAYING" ||
+                state === "PAUSED" ||
+                state === "READY"
+            ) {
+
+                webapis.avplay.stop();
+            }
+
+
+            if (
+                webapis.avplay.getState() !==
+                "NONE"
+            ) {
+
+                webapis.avplay.close();
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Stop playback error:",
+                error
+            );
+        }
+    }
+
+
+    isChannelPlaying = false;
+    isChannelPaused = false;
+
+
+    var placeholder =
+        document.getElementById(
+            "player-placeholder"
+        );
+
+    var loading =
+        document.getElementById(
+            "player-loading"
+        );
+
+    var errorBox =
+        document.getElementById(
+            "player-error"
+        );
+
+
+    placeholder.classList.remove(
+        "hidden"
+    );
+
+    loading.classList.add(
+        "hidden"
+    );
+
+    errorBox.classList.add(
+        "hidden"
+    );
+
+
+    var channels =
+        document.querySelectorAll(
+            ".channel-card"
+        );
+
+
+    if (channels.length > 0) {
+
+        channels[0].focus();
+    }
+}
+
+
     setupRemoteNavigation();
 }
 
 
-function selectChannel(channel) {
+function setupRemoteNavigation() {
 
-    console.log(
-        "Selected:",
-        channel.name,
-        channel.url
-    );
+    var categories =
+        document.querySelectorAll(
+            ".category-item"
+        );
 
+    var channelCards =
+        document.querySelectorAll(
+            ".channel-card"
+        );
+
+
+    /*
+     * CATEGORY NAVIGATION
+     */
+
+    for (
+        var i = 0;
+        i < categories.length;
+        i++
+    ) {
+
+        categories[i].onkeydown =
+            function (event) {
+
+                var current =
+                    Array.prototype.indexOf.call(
+                        categories,
+                        this
+                    );
+
+
+                // UP
+                if (event.keyCode === 38) {
+
+                    event.preventDefault();
+
+                    if (current > 0) {
+
+                        categories[
+                            current - 1
+                        ].focus();
+                    }
+                }
+
+
+                // DOWN
+                else if (event.keyCode === 40) {
+
+                    event.preventDefault();
+
+                    if (
+                        current <
+                        categories.length - 1
+                    ) {
+
+                        categories[
+                            current + 1
+                        ].focus();
+                    }
+                }
+
+
+                // RIGHT -> CHANNELS
+                else if (event.keyCode === 39) {
+
+                    event.preventDefault();
+
+                    if (
+                        channelCards.length > 0
+                    ) {
+
+                        channelCards[0].focus();
+                    }
+                }
+
+
+                // ENTER / OK
+                else if (event.keyCode === 13) {
+
+                    event.preventDefault();
+
+                    this.click();
+                }
+            };
+    }
+
+
+    /*
+     * CHANNEL NAVIGATION
+     */
+
+    for (
+        var j = 0;
+        j < channelCards.length;
+        j++
+    ) {
+
+        channelCards[j].onkeydown =
+            function (event) {
+
+                var current =
+                    Array.prototype.indexOf.call(
+                        channelCards,
+                        this
+                    );
+
+
+                // UP
+                if (event.keyCode === 38) {
+
+                    event.preventDefault();
+
+                    if (current > 0) {
+
+                        channelCards[
+                            current - 1
+                        ].focus();
+
+                        channelCards[
+                            current - 1
+                        ].scrollIntoView({
+                            block: "nearest"
+                        });
+                    }
+                }
+
+
+                // DOWN
+                else if (event.keyCode === 40) {
+
+                    event.preventDefault();
+
+                    if (
+                        current <
+                        channelCards.length - 1
+                    ) {
+
+                        channelCards[
+                            current + 1
+                        ].focus();
+
+                        channelCards[
+                            current + 1
+                        ].scrollIntoView({
+                            block: "nearest"
+                        });
+                    }
+                }
+
+
+                // LEFT -> CATEGORIES
+                else if (event.keyCode === 37) {
+
+                    event.preventDefault();
+
+                    var activeCategory =
+                        document.querySelector(
+                            ".category-item.active"
+                        );
+
+                    if (activeCategory) {
+
+                        activeCategory.focus();
+                    }
+                }
+
+
+                // ENTER / OK
+                else if (event.keyCode === 13) {
+
+                    event.preventDefault();
+
+                    this.click();
+                }
+            };
+    }
+
+
+    /*
+     * INITIAL FOCUS
+     */
+
+    if (
+        categories.length > 0 &&
+        !document.activeElement.classList.contains(
+            "category-item"
+        ) &&
+        !document.activeElement.classList.contains(
+            "channel-card"
+        )
+    ) {
+
+        categories[0].focus();
+    }
+}
+
+
+function showChannelInfo(channel) {
 
     var player =
         document.getElementById(
             "player-placeholder"
         );
-
 
     player.innerHTML =
         "<div class='large-play'>▶</div>" +
@@ -619,6 +1065,240 @@ function selectChannel(channel) {
         "<p>" +
         escapeHTML(channel.group) +
         "</p>";
+}
+
+
+function playChannel(channel) {
+
+    var placeholder =
+        document.getElementById(
+            "player-placeholder"
+        );
+
+    var loading =
+        document.getElementById(
+            "player-loading"
+        );
+
+    var errorBox =
+        document.getElementById(
+            "player-error"
+        );
+
+    errorBox.classList.add("hidden");
+    loading.classList.remove("hidden");
+
+
+    if (
+        typeof webapis === "undefined" ||
+        !webapis.avplay
+    ) {
+
+        loading.classList.add("hidden");
+
+        errorBox.textContent =
+            "AVPlay is not available. Playback must be tested on a Samsung Tizen TV.";
+
+        errorBox.classList.remove("hidden");
+
+        console.log(
+            "AVPlay unavailable in this environment."
+        );
+
+        return;
+    }
+
+
+    try {
+
+        try {
+
+            var state =
+                webapis.avplay.getState();
+
+            if (
+                state !== "NONE" &&
+                state !== "IDLE"
+            ) {
+                webapis.avplay.stop();
+            }
+
+            if (state !== "NONE") {
+                webapis.avplay.close();
+            }
+
+        } catch (previousError) {
+
+            console.log(
+                "No previous stream to close."
+            );
+        }
+
+
+        webapis.avplay.open(
+            channel.url
+        );
+
+
+        webapis.avplay.setListener({
+
+            onbufferingstart: function () {
+
+                loading.classList.remove(
+                    "hidden"
+                );
+
+                loading.textContent =
+                    "Loading...";
+            },
+
+
+            onbufferingprogress: function (percent) {
+
+                loading.textContent =
+                    "Loading " +
+                    percent +
+                    "%";
+            },
+
+
+            onbufferingcomplete: function () {
+
+                loading.classList.add(
+                    "hidden"
+                );
+            },
+
+
+            onstreamcompleted: function () {
+
+                console.log(
+                    "Stream completed"
+                );
+            },
+
+
+            oncurrentplaytime: function (currentTime) {
+
+            },
+
+
+            onerror: function (eventType) {
+
+                console.error(
+                    "AVPlay error:",
+                    eventType
+                );
+
+                loading.classList.add(
+                    "hidden"
+                );
+
+                errorBox.textContent =
+                    "Unable to play this channel.";
+
+                errorBox.classList.remove(
+                    "hidden"
+                );
+            },
+
+
+            onevent: function (
+                eventType,
+                eventData
+            ) {
+
+                console.log(
+                    "AVPlay event:",
+                    eventType,
+                    eventData
+                );
+            },
+
+
+            onsubtitlechange: function () {
+
+            },
+
+
+            ondrmevent: function () {
+
+            }
+
+        });
+
+
+        webapis.avplay.setDisplayRect(
+            780,
+            90,
+            1140,
+            935
+        );
+
+
+        webapis.avplay.prepareAsync(
+
+            function () {
+
+                console.log(
+                    "AVPlay prepared"
+                );
+
+                placeholder.classList.add(
+                    "hidden"
+                );
+
+                loading.classList.add(
+                    "hidden"
+                );
+
+                webapis.avplay.play();
+                isChannelPlaying = true;
+isChannelPaused = false;
+            },
+
+
+            function (error) {
+
+                console.error(
+                    "Prepare error:",
+                    error
+                );
+
+                loading.classList.add(
+                    "hidden"
+                );
+
+                errorBox.textContent =
+                    "Stream could not be prepared.";
+
+                errorBox.classList.remove(
+                    "hidden"
+                );
+            }
+
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Playback error:",
+            error
+        );
+
+        loading.classList.add(
+            "hidden"
+        );
+
+        errorBox.textContent =
+            "Playback error: " +
+            error.message;
+
+        errorBox.classList.remove(
+            "hidden"
+        );
+    }
 }
 
 

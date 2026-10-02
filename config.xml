@@ -16,12 +16,11 @@
 
     <content src="index.html"/>
 
-    <!-- Internet access -->
     <access origin="*" subdomains="true"/>
 
-    <!-- Samsung TV / Tizen privileges -->
     <tizen:privilege name="http://tizen.org/privilege/internet"/>
     <tizen:privilege name="http://tizen.org/privilege/tv.inputdevice"/>
+    <tizen:privilege name="http://developer.samsung.com/privilege/avplay"/>
 
     <feature name="http://tizen.org/feature/screen.size.normal.1080.1920"/>
 

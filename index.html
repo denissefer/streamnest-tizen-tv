@@ -98,23 +98,35 @@
 
 
             <!-- PLAYER AREA -->
-            <section class="player-area">
+           <section class="player-area">
 
-                <div id="player-placeholder">
+    <object
+        id="av-player"
+        type="application/avplayer"
+    ></object>
 
-                    <div class="large-play">
-                        ▶
-                    </div>
+    <div id="player-placeholder">
 
-                    <h2>Select a channel</h2>
+        <div class="large-play">
+            ▶
+        </div>
 
-                    <p>
-                        Choose a channel from the list
-                    </p>
+        <h2>Select a channel</h2>
 
-                </div>
+        <p>
+            Choose a channel from the list
+        </p>
 
-            </section>
+    </div>
+
+    <div id="player-loading" class="hidden">
+        Loading...
+    </div>
+
+    <div id="player-error" class="hidden">
+    </div>
+
+</section>
 
         </main>
 
