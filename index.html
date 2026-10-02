@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, initial-scale=1.0">
+
+    <title>StreamNest</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<div id="app">
+
+    <!-- WELCOME / ADD PLAYLIST -->
+    <section id="welcome-screen" class="screen">
+
+        <div class="brand">
+            Stream<span>Nest</span>
+        </div>
+
+        <div class="welcome-box">
+
+            <div class="welcome-icon">▶</div>
+
+            <h1>Welcome to StreamNest</h1>
+
+            <p>Add your M3U playlist to start watching.</p>
+
+            <input
+                id="playlist-url"
+                type="text"
+                placeholder="https://example.com/playlist.m3u"
+                autocomplete="off"
+            >
+
+            <button id="add-playlist-btn">
+                Add Playlist
+            </button>
+
+            <div id="status-message"></div>
+
+        </div>
+
+    </section>
+
+
+    <!-- IPTV HOME -->
+    <section id="tv-screen" class="screen hidden">
+
+        <header class="topbar">
+
+            <div class="logo">
+                Stream<span>Nest</span>
+            </div>
+
+            <div class="top-right">
+                <span id="channel-total"></span>
+                <span id="clock">00:00</span>
+            </div>
+
+        </header>
+
+
+        <main class="content">
+
+            <!-- CATEGORIES -->
+            <aside class="sidebar">
+
+                <div class="sidebar-title">
+                    Categories
+                </div>
+
+                <div id="category-list"></div>
+
+            </aside>
+
+
+            <!-- CHANNELS -->
+            <section class="channels">
+
+                <div class="channel-header">
+
+                    <div>
+                        <h1 id="current-category">
+                            All Channels
+                        </h1>
+
+                        <p id="current-count"></p>
+                    </div>
+
+                </div>
+
+                <div id="channel-list"></div>
+
+            </section>
+
+
+            <!-- PLAYER AREA -->
+            <section class="player-area">
+
+                <div id="player-placeholder">
+
+                    <div class="large-play">
+                        ▶
+                    </div>
+
+                    <h2>Select a channel</h2>
+
+                    <p>
+                        Choose a channel from the list
+                    </p>
+
+                </div>
+
+            </section>
+
+        </main>
+
+
+        <footer>
+            <span>↑ ↓ Navigate</span>
+            <span>← → Sections</span>
+            <span>OK Select</span>
+            <span>Back Return</span>
+        </footer>
+
+    </section>
+
+</div>
+
+<script src="js/main.js"></script>
+
+</body>
+</html>

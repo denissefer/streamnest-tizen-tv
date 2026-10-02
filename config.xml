@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<widget xmlns="http://www.w3.org/ns/widgets"
+        xmlns:tizen="http://tizen.org/ns/widgets"
+        version="1.0.0"
+        viewmodes="maximized">
+
+    <tizen:application
+        id="iIEpmuCZlF.StreamNest"
+        package="iIEpmuCZlF"
+        required_version="2.3"/>
+
+    <name>StreamNest</name>
+
+    <icon src="icon.png"/>
+
+    <content src="index.html"/>
+
+    <!-- Internet access -->
+    <access origin="*" subdomains="true"/>
+
+    <!-- Samsung TV / Tizen privileges -->
+    <tizen:privilege name="http://tizen.org/privilege/internet"/>
+    <tizen:privilege name="http://tizen.org/privilege/tv.inputdevice"/>
+
+    <feature name="http://tizen.org/feature/screen.size.normal.1080.1920"/>
+
+    <tizen:setting
+        screen-orientation="landscape"
+        context-menu="disable"
+        background-support="disable"
+        encryption="disable"
+        install-location="auto"
+        hwkey-event="enable"/>
+
+</widget>

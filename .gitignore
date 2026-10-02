@@ -1,0 +1,20 @@
+# Tizen build packages
+*.wgt
+*.tpk
+
+# Tizen temporary/build files
+.build/
+.buildResult/
+.sign/
+Debug/
+Release/
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
